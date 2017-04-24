@@ -6,9 +6,9 @@ Yet Another Attempt - YAA to parse a FG aircraft *set* file, and show various pa
 
 After writing xmlEnum, decided to apply that to a [FlightGear][1] aircraft set [XML file][2], using the [xmpParser][3] library, started this fgsetxml project...
 
-A previous attempt, fgxmlset project [4], used the libXML2 library [5], pull XML parsing, but that requires that you keep track of each open, data, close callbacks - WAY too difficult! I had already tried SG so called `easyxml`, [6], but again this PULL parser seemed too difficult, so abandoned it...
+A previous attempt, [fgxmlset][4] project, used the [libXML2][5] library, pull XML parsing, but that requires that you keep track of each open, data, close callbacks - WAY too difficult! I had already tried SG so called `easyxml`, [6], but again this PULL parser seemed too difficult, so abandoned it...
 
-Using the xmlParser library [3], I first wrote an `xmlEnum` app, to enumerate through ALL the nodes collected during the xmlParser file load, and this started to show me a way forward with this quite  specialised [aero]-set.xml used in SG/FG... whihc can INLCUDE many other XML files, located in various places, soem of which reuire FG_ROOT to be set (ENV or -r path option). This is the result.
+Using the [xmlParser][3] library, I first wrote an `xmlEnum` app, to enumerate through ALL the nodes collected during the xmlParser file load, and this started to show me a way forward with this quite  specialised [aero]-set.xml used in SG/FG... whihc can INLCUDE many other XML files, located in various places, soem of which reuire FG_ROOT to be set (ENV or -r path option). This is the result.
 
 The purpose here is to have a set of default XPaths to find, and show the results Like: `sim/aircraft-version` and show the text `2017.1`, and so on... And that static list can be extended with the `-x xpath` option...
 
@@ -18,18 +18,20 @@ Could of course add all from the static list in the FG source [7], but that seem
 
 What I have now seems **very messy**, BUT it WORKS! ;=))
 
-   [1]: http://www.flightgear.org/
-   [2]: http://wiki.flightgear.org/Aircraft-set.xml
-   [3]: https://www.applied-mathematics.net/tools/xmlparser_doc/html/index.html
-        http://www.applied-mathematics.net/tools/xmlParser.html
+More xmlParser information - http://www.applied-mathematics.net/tools/xmlParser.html
         source: Download here: small, simple, multi-Plateform XMLParser library with examples (zipfile).
         version: v2.44: May 19, 2013
         license: Aladdin Free Public License (Version 8, November 18, 1999) - see xmlParser/AFPL-license.txt
         copyright: Copyright (c) 2002, Frank Vanden Berghen - All rights reserved.
-    [4] https://github.com/geoffmcl/fgxmlset - fgxmlset
-    [5] http://www.xmlsoft.org/ - libXML2
-    [6] https://sourceforge.net/p/flightgear/simgear/ci/next/tree/simgear/xml/easyxml.cxx - easyxml
-    [7] https://sourceforge.net/p/flightgear/flightgear/ci/next/tree/src/MultiPlayer/multiplaymgr.cxx#l128 - FG MP Source
+
+
+   [1]: http://www.flightgear.org/
+   [2]: http://wiki.flightgear.org/Aircraft-set.xml
+   [3]: https://www.applied-mathematics.net/tools/xmlparser_doc/html/index.html
+   [4]: https://github.com/geoffmcl/fgxmlset
+   [5]: http://www.xmlsoft.org/
+   [6]: https://sourceforge.net/p/flightgear/simgear/ci/next/tree/simgear/xml/easyxml.cxx
+   [7]: https://sourceforge.net/p/flightgear/flightgear/ci/next/tree/src/MultiPlayer/multiplaymgr.cxx#l128
 
 ## Building:
 
