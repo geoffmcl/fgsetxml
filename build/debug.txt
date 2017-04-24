@@ -1,0 +1,26 @@
+debug.txt
+
+Some test examples in my system...
+
+X:\fgdata\Aircraft\c172p\c172p-set.xml
+
+-r X:\fgdata G:\D\fgaddon\Aircraft\A320-family\A320-copilot-set.xml
+             G:\D\fgaddon\Aircraft\A320-family\A320-231-set.xml
+             G:\D\fgaddon\Aircraft\ZLT-NT\ZLT-NT-set.xml
+             G:\D\fgaddon\Aircraft\747-400\747-400-set.xml
+             fgsetxml: CHECK ME2: Added 3 xpaths, but total of 4! input 
+		G:\D\fgaddon\Aircraft\737-300\737-300-set.xml
+             G:\D\fgaddon\Aircraft\eurofighter\typhoon-set.xml
+             Usign -v9 got ERROR EXIT ON -
+             XPath: 'sim/menubar'
+             Got Error exit on 747-8f-set.xml
+		G:\D\fgaddon\Aircraft\747-8i\747-8f-set.xml
+                                            \747-8i-set.xml
+		and  A380-set.xml, airwaveXtreme150-JSBSim-set.xml,
+		Alouette-III_sc-set.xml, ask13-set.xml, asw28-set.xml,
+		 bf109g-set.xml, 
+
+; eof
+
+Working Directory: $(ProjectDir)
+

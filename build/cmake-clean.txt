@@ -1,0 +1,2 @@
+outputTestUTF8.xml
+test.xml
