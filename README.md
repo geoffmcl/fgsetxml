@@ -14,7 +14,7 @@ The purpose here is to have a set of default XPaths to find, and show the result
 
 It was more difficult to enumerate all those nodes that begin with `sim/multiplay/generic/float[n]|int[n]|string[n]` since you do **not** know beforehand which will actually exist, so had to develop a special iterator for this - see `void check_multiplay(XMLNode xnode, int dep, vSTG &vX);`.
 
-Could of course add all from the static list in the [FG][7] source, but that seems **too much**... and must be  updateted when that source is changed, which it did recently...
+Could of course add all from the static list in the [FG][7] source, but that seems **too much**... and must be  updated when that source is changed, which it did recently...
 
 What I have now seems **very messy**, BUT it WORKS! ;=))
 
