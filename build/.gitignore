@@ -1,0 +1,11 @@
+CMakeCache.txt
+CMakeFiles/*
+Makefile
+bldlog-1.txt
+cmake_install.cmake
+fgsetxml
+libutils_lib.a
+libxmlParser.a
+xmlEnum
+xmlTest
+
