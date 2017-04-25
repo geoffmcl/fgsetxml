@@ -680,7 +680,7 @@ void enum_node(XMLNode xnode, int dep, int lev, vSTG &vX)
             }
             if (n && v) {
                 if (strcmp(n, "include") == 0) {
-                    if (i = process_include_file(v)) {
+                    if ((i = process_include_file(v))!= 0) {
                         add_2_includes(v);  // show missing later
                         if (VERB9)
                             SPRTF("%s: Failed to find include '%s'\n", module, v);
@@ -712,7 +712,7 @@ void enum_node(XMLNode xnode, int dep, int lev, vSTG &vX)
                 tmp = get_extension(xnc.text);
                 if (tmp.size()) {
                     if (tmp == ".xml") {
-                        if (i = process_include_file(xnc.text)) {
+                        if ((i = process_include_file(xnc.text)) != 0) {
                             add_2_includes(xnc.text);   // show missed later
                             if (VERB9)
                                 SPRTF("%s: Failed to find include '%s'\n", module, xnc.text);
