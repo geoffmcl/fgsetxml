@@ -1,2 +1,8 @@
 outputTestUTF8.xml
 test.xml
+fgsetxml
+libutils_lib.a
+libxmlParser.a
+xmlEnum
+xmlTest
+
