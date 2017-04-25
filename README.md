@@ -8,7 +8,7 @@ After writing xmlEnum, decided to apply that to a [FlightGear][1] aircraft set [
 
 A previous attempt, [fgxmlset][4] project, used the [libXML2][5] library, pull XML parsing, but that requires that you keep track of each open, data, close callbacks - WAY too difficult! I had already tried SG so called [easyxml][6], but again this PULL parser seemed too difficult, so abandoned it...
 
-Using the [xmlParser][3] library, I first wrote an `xmlEnum` app, to enumerate through ALL the nodes collected during the xmlParser file load, and this started to show me a way forward with this quite  specialised `aero-set.xml` used in SG/FG... which can INLCUDE many other XML files, located in various places, soem of which reuire FG_ROOT to be set (ENV or -r path option). This is the result.
+Using the [xmlParser][3] library, I first wrote an `xmlEnum` app, to enumerate through ALL the nodes collected during the xmlParser file load, and this started to show me a way forward with this quite  specialised `aero-set.xml` used in SG/FG... which can INLCUDE many other XML files, located in various places, seme of which reuire FG_ROOT to be set (ENV or -r path option). This is the result.
 
 The purpose here is to have a set of default XPaths to find, and show the results Like: `sim/aircraft-version` and show the text `2017.1`, and so on... And that static list can be extended with the `-x xpath` option...
 
