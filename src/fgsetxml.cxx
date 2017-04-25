@@ -1202,6 +1202,7 @@ int main(int argc, char **argv)
 {
     //test_gp("xmlParser.sln");
     int iret = 0;
+    size_t ii, max;
     set_fg_root();
     init_xpaths();
     iret = parse_args(argc, argv);
@@ -1219,7 +1220,7 @@ int main(int argc, char **argv)
     //////////////////////////////////////////////////////
     /// Deal with the MISSING INCLUDES
     //////////////////////////////////////////////////////
-    size_t ii, max = vIncludes.size();
+    max = vIncludes.size();
     if (max) {
         // *** ALWAYS show when missed finding some include files ***
         SPRTF("%s: Failed to find %d include files...\n", module, (int)max);
@@ -1251,3 +1252,4 @@ exit:
 }
 
 // eof = fgsetxml.cxx
+

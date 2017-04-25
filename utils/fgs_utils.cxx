@@ -7,7 +7,12 @@
 \*/
 
 #include <stdio.h>
-// other includes
+#include <sys/types.h>
+#include <sys/stat.h>   // for unix struct stat, ...
+#ifndef _WIN32
+#include <unistd.h> // for getcwd(), ...
+#include <string.h> // for strlen(), ...
+#endif
 #include "fgs_utils.hxx"
 
 static const char *module = "fgs_utils";
