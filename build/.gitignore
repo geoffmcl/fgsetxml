@@ -16,3 +16,5 @@ Release/*
 *.dir/*
 *.sln
 x64/*
+*.VC.opendb
+*.VC.db
