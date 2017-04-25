@@ -50,11 +50,10 @@ void give_help( char *name )
 
 int parse_args( int argc, char **argv )
 {
-    int i,i2,c;
+    int i,c;
     char *arg, *sarg;
     for (i = 1; i < argc; i++) {
         arg = argv[i];
-        i2 = i + 1;
         if (*arg == '-') {
             sarg = &arg[1];
             while (*sarg == '-')

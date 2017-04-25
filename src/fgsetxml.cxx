@@ -768,7 +768,7 @@ void check_multiplay(XMLNode xnode, int dep, vSTG &vX)
     std::string path, alias;
     const char *n;
     const char *v;
-    const char *nm;
+    // const char *nm;
     int count = 0;
     if (xnode.isEmpty()) {
         SPRTF("%s: CHECK ME - check_multiplay passed EMPTY xnode!\n", module);
@@ -799,12 +799,7 @@ void check_multiplay(XMLNode xnode, int dep, vSTG &vX)
                         alias = "";
                         for (jj = 0; jj < nn; jj++) {
                             XMLNodeContents xnc = xc.enumContents(jj);
-
-                            if (xnc.etype == eNodeChild) {
-                                //nm = xc.getName();
-                                nm = xnc.child.getName();
-                            }
-                            else if (xnc.etype == eNodeAttribute) {
+                            if (xnc.etype == eNodeAttribute) {
                                 n = xnc.attrib.lpszName;
                                 v = xnc.attrib.lpszValue;
                                 if (strcmp(n, "n") == 0) {
