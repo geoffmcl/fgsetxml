@@ -8,4 +8,11 @@ libutils_lib.a
 libxmlParser.a
 xmlEnum
 xmlTest
-
+*.vcxproj
+*.filters
+*.user
+Debug/*
+Release/*
+*.dir/*
+*.sln
+x64/*
