@@ -43,6 +43,7 @@ extern std::string get_extension(std::string path);
 
 //////////////////////////////////////////////////////////
 extern int is_file_or_directory(const char * path); // 1 = file, 2 = dir, 0 = neither
+extern size_t get_last_file_size();
 
 #endif // #ifndef _FGS_UTILS_HXX_
 // eof - fgs_utils.hxx
