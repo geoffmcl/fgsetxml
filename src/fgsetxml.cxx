@@ -492,6 +492,116 @@ int chk_log_file(int argc, char **argv)
     return 0;
 }
 
+int parse_args(int argc, char **argv);
+
+static int ininput = 0;
+
+int process_input_file(const char *file, size_t len)
+{
+    FILE *fp = fopen(file, "rb");
+    if (!fp) {
+        SPRTF("%s: Error: Can NOT 'open' file '%s'!\n", module, file);
+        return 1;
+    }
+    char *cp = (char *)malloc(len + 4);
+    if (!cp) {
+        fclose(fp);
+        SPRTF("%s: Error: Can NOT 'allocate' buffer for input file '%s'!\n", module, file);
+        return 1;
+    }
+    size_t ii, max = fread(cp, 1, len, fp);
+    if (max != len) {
+        fclose(fp);
+        free(cp);
+        SPRTF("%s: Error: Can NOT 'read' input file '%s'!\n", module, file);
+        return 1;
+    }
+    fclose(fp);
+    cp[len] = 0;
+
+    ///////////////////////////////////////////////////
+    int c, delim, count;
+    char *bgn = 0;
+    //const char *dummy = "dummy";
+    std::vector<char *> vPts;
+    //vPts.push_back((char *)dummy);
+    for (ii = 0; ii < len; ii++) {
+        c = cp[ii];
+        if (c <= ' ') {
+            cp[ii] = 0;
+            continue;
+        }
+        if (c == '#') {
+            ii++;
+            // comment - go to end of line
+            for (; ii < len; ii++) {
+                c = cp[ii];
+                if ((c == '\r') || (c == '\n'))
+                    break;
+            }
+            continue;
+        }
+        // char not below/equal space, and not comment start 
+        bgn = &cp[ii];  // option starts, potentially
+        //vPts.push_back(bgn);
+        delim = 0;
+        count = 0;
+        if (*bgn == '"') {
+            delim = '"';    // so file names with spaces are ok
+            bgn++;  // option starts with next char
+            ii++;   // skip delim char
+            if (*bgn && (*bgn != delim))
+                count++;
+        }
+        else
+            count++;    // we have 1 char so far...
+        ii++;   // get to next char
+        for (; ii < len; ii++) {
+            c = cp[ii];
+            if (delim && (c == delim)) {
+                cp[ii] = 0;
+                ii++;
+                break;
+            } else if (c <= ' ') {
+                // not '"' deliminated, so terminate on space
+                cp[ii] = 0;
+                break;
+            }
+            count++;
+        }
+        if (count)  // if option has length
+            vPts.push_back(bgn);
+        bgn = 0;
+    }
+    if (bgn)
+        vPts.push_back(bgn);
+    max = vPts.size();
+    c = 0;
+    if (max) {
+        //vPts.push_back(0);
+        char **argv = (char **)malloc((max + 2) * sizeof(char *));
+        if (!argv) {
+            SPRTF("%s: Memory allocation FAILED!\n", module);
+            c = 1;
+        }
+        else {
+            argv[0] = "dummy";  // put a dummp exe anem
+            for (ii = 0; ii < max; ii++) {
+                bgn = vPts[ii]; // get each point
+                argv[ii + 1] = bgn; // add to argv list
+            }
+            max++;  // bump for extra 'dummy' arg added
+            argv[max] = 0;  // not sure if this is required
+            //c = parse_args((int)max, (char **)&vPts); // this should have worked??
+            c = parse_args((int)max, argv);
+            free(argv);
+        }
+    }
+    free(cp);
+    return c;
+}
+
+
 /*
     Parse the command line
 */
@@ -511,7 +621,8 @@ int parse_args( int argc, char **argv )
         }
         //////////////////////////////////////////////////////////////
         i2 = i + 1;
-        if (*arg == '-') {
+        c = *arg;
+        if (c == '-') {
             sarg = &arg[1];
             while (*sarg == '-')
                 sarg++;
@@ -576,6 +687,20 @@ int parse_args( int argc, char **argv )
                 SPRTF("%s: Unknown argument '%s'. Try -? for help...\n", module, arg);
                 return 1;
             }
+        } else if (c == '@') {
+            sarg = &arg[1];
+            if (is_file_or_directory(sarg) == 1) {
+                ininput++;
+                i2 = process_input_file(sarg, get_last_file_size());
+                ininput--;
+                if (i2)
+                    return i2;
+            }
+            else {
+                SPRTF("%s: Error: Can NOT 'stat' input file '%s'!\n", module, sarg);
+                return 1;
+            }
+
         } else {
             // bear argument
             if (is_file_or_directory(arg) != 1) {
@@ -587,17 +712,19 @@ int parse_args( int argc, char **argv )
         }
     }
 
+    if (!ininput) {
 #if !defined(NDEBUG)
-    if (!usr_input) {
-        usr_input = strdup(DEF_TEST_FILE);
-        vUsrInputs.push_back(usr_input);
-        // verbosity = 9;
-    }
+        if (!usr_input) {
+            usr_input = strdup(DEF_TEST_FILE);
+            vUsrInputs.push_back(usr_input);
+            // verbosity = 9;
+        }
 #endif
 
-    if (!usr_input) {
-        SPRTF("%s: No user input found in command!\n", module);
-        return 1;
+        if (!usr_input) {
+            SPRTF("%s: No user input found in command!\n", module);
+            return 1;
+        }
     }
     return 0;
 }
