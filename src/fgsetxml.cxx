@@ -71,7 +71,7 @@
 static const char *module = "fgsetxml";
 
 static const char *usr_input = 0;
-
+static vSTG vUsrInputs;
 static int show_child_names = 0;    // we are enumerating children
 static int show_clear_tags = 0; // seems these are comments
 static int show_unhandled_paths = 0;    // MAYBE! if required...
@@ -109,6 +109,8 @@ static int verbosity = 0;
 
 static std::string active_path;
 static vSTG vActPaths;
+static vSTG vUsrXPaths;
+static int doneInit = 0;
 // DEFAULTS
 static mSTGvSTG xpaths;
 const char *xpath_defaults[] = {
@@ -131,34 +133,59 @@ const char *xpath_defaults[] = {
 int process_include_file(const char *ifile);
 void enum_children(XMLNode xnode, int dep, vSTG &vX);
 
+
+void add_to_usr_xpaths(std::string xp)
+{
+    vUsrXPaths.push_back(xp);
+}
+
+void show_default_xpaths()
+{
+    std::string s;
+    size_t ii, max = vUsrXPaths.size();
+    for (ii = 0; ii < max; ii++) {
+        s = vUsrXPaths[ii];
+        SPRTF("  %s\n", s.c_str());
+    }
+    for (ii = 0; ; ii++) {
+        if (!xpath_defaults[ii])
+            break;
+        s = xpath_defaults[ii];
+        SPRTF("  %s\n", s.c_str());
+    }
+}
+
 /*
     Convert the above 'default' list to a map of 
     xpaths, each containing a vSTG *...
 */
 void init_xpaths()
 {
-    int i;
     std::string s;
-    for (i = 0; ; i++) {
-        if (!xpath_defaults[i])
-            break;
-        s = xpath_defaults[i];
-        xpaths[s] = new vSTG;
+    iSTGvSTG it;
+    ///////////////////////////////////////////////////
+    // first ADD any USER XPaths
+    size_t ii, max = vUsrXPaths.size();
+    for (ii = 0; ii < max; ii++) {
+        s = vUsrXPaths[ii];
+        it = xpaths.find(s);
+        if (it == xpaths.end()) {
+            xpaths[s] = new vSTG;
+        }
     }
-}
-
-void show_default_xpaths()
-{
-    int i;
-    std::string s;
-    for (i = 0; ; i++) {
-        if (!xpath_defaults[i])
-            break;
-        s = xpath_defaults[i];
-        SPRTF("  %s\n", s.c_str());
+    //////////////////////////////////////////////////
+    // then add the defaults, if NOT already defined
+    for (ii = 0; ; ii++) {
+        if (!xpath_defaults[ii])
+            break;  // reached termination null
+        s = xpath_defaults[ii];
+        it = xpaths.find(s);
+        if (it == xpaths.end()) {
+            xpaths[s] = new vSTG;
+        }
     }
+    doneInit = 1;
 }
-
 
 void add_to_vSTG_ptr(vSTG *vsp, std::string v)
 {
@@ -202,9 +229,11 @@ void clear_xpaths()
     iSTGvSTG it;
     for (it = xpaths.begin(); it != xpaths.end(); it++) {
         vsp = it->second;
+        vsp->clear();
         delete vsp;
     }
     xpaths.clear();
+    doneInit = 0;
 }
 
 vSTG *path_in_xpaths(std::string path)
@@ -307,6 +336,7 @@ void show_xpaths(const char *in_file)
             SPRTF(" %s\n", n.c_str());
         }
     }
+    clear_xpaths(); // clear xpaths for each file
 }
 
 void add_2_active_path(std::string path)
@@ -403,7 +433,7 @@ void give_help( char *name )
 {
     show_version();
     SPRTF("\n");
-    SPRTF("%s: usage: [options] xml_input\n", module);
+    SPRTF("%s: usage: [options] xml_input [xml_input2 ...]\n", module);
     SPRTF("Options:\n");
     SPRTF(" --help   (-h or -?) = This help and exit(0)\n");
     SPRTF(" --verb[n]      (-v) = Bump or set verbosity to n. Values 0,1,...9 (def=%d)\n", verbosity);
@@ -414,7 +444,7 @@ void give_help( char *name )
         mp_list ? mp_list : "none");
     SPRTF(" --xpath <path> (-x) = Add a seekable xpath to find and display.\n");
     SPRTF("\n");
-    SPRTF(" In essence, given a FlightGear 'aero-set.xml' file, see 'http://wiki.flightgear.org/Aircraft-set.xml',\n");
+    SPRTF(" In essence, given one or more FlightGear 'aero-set.xml' files, see 'http://wiki.flightgear.org/Aircraft-set.xml',\n");
     SPRTF(" find, show the default set of xpaths. The default set consists of -\n");
     show_default_xpaths();
     SPRTF("\n");
@@ -535,7 +565,7 @@ int parse_args( int argc, char **argv )
                 if (i2 < argc) {
                     i++;
                     sarg = argv[i];
-                    add_to_xpaths(sarg, "");
+                    add_to_usr_xpaths(sarg);
                 }
                 else {
                     SPRTF("%s: Expected xpath to follow %s!", module, arg);
@@ -548,17 +578,19 @@ int parse_args( int argc, char **argv )
             }
         } else {
             // bear argument
-            if (usr_input) {
-                SPRTF("%s: Already have input '%s'! What is this '%s'?\n", module, usr_input, arg );
+            if (is_file_or_directory(arg) != 1) {
+                SPRTF("%s: Error: Unable to 'stat' file '%s'!\n", module, arg );
                 return 1;
             }
-            usr_input = strdup(arg);
+            usr_input = arg;
+            vUsrInputs.push_back(arg);
         }
     }
 
 #if !defined(NDEBUG)
     if (!usr_input) {
         usr_input = strdup(DEF_TEST_FILE);
+        vUsrInputs.push_back(usr_input);
         // verbosity = 9;
     }
 #endif
@@ -972,19 +1004,13 @@ int enum_xml(const char *file)
         SPRTF("Failed file '%s'! '%s'\n", file, err ? err : "Error: Unknown");
         return 1;
     }
-    if (VERB3) {
-        SPRTF("%s:[v3] Doing file: '%s'...\n", module, file);
-    }
+
     add_2_active_path(get_path_only(ff));
 
     vSTG vX;    // init an XPath for this file
     enum_node(xnode,0,0,vX);    // maybe not required, since it is only the declaration
     enum_children(xnode,0,vX);  // walk the tree of children
 
-    //     xNode=xMainNode.getChildNode("RegressionModel").getChildNode("RegressionTable");
-    if (VERB7) {
-        SPRTF("%s:[v7] Done file: '%s'...\n", module, file);
-    }
     return 0;
 }
 
@@ -1190,6 +1216,65 @@ void clean_up()
 
 }
 
+int process_user_inputs()
+{
+    int iret = 0;
+
+    size_t ii, max;
+    size_t jj, cnt = vUsrInputs.size();
+    std::string s;
+    SPRTF("%s: Processing %d inputs...\n", module, (int)cnt);
+    for (jj = 0; jj < cnt; jj++) {
+        s = vUsrInputs[jj];
+        usr_input = s.c_str();
+        //if (VERB3) {
+        SPRTF("\n");
+        SPRTF("%s: Doing file: '%s'...\n", module, usr_input);
+        //}
+        init_xpaths();
+
+        set_suggested_root(usr_input);
+
+        iret |= enum_xml(usr_input); // actions of app
+
+        show_xpaths(usr_input); // NOTE: This also clears the vector xpaths vector
+        //////////////////////////////////////////////////////
+        /// Deal with the MISSING INCLUDES
+        //////////////////////////////////////////////////////
+        max = vIncludes.size();
+        if (max) {
+            // *** ALWAYS show when missed finding some include files ***
+            SPRTF("%s: Failed to find %d include files...\n", module, (int)max);
+            for (ii = 0; ii < max; ii++) {
+                std::string nf = vIncludes[ii];
+                SPRTF("%s: Fail to find '%s'\n", module, nf.c_str());
+            }
+            if (fg_root)
+                SPRTF("%s: Is the given FG_ROOT=%s correct!\n", module, fg_root);
+            else
+                SPRTF("%s: Note: No FG_ROOT (-r dir) given. Some of these files could reside there...\n", module);
+            show_missed_includes(max);    // ADD diagnostics in hope to find out ***WHY*** missed these files
+                                          // somehow, expect to FIND THEM ALL!!! But in all recent cases explored, it seems the file
+                                          // truely DOES NOT EXIST in the current source...
+        }
+        //////////////////////////////////////////////////////
+        vIncludes.clear();
+        vActPaths.clear();
+
+        if (VERB2) {
+            show_ac_files();
+        }
+
+        vacFiles.clear();
+        vrgbFiles.clear();
+        //if (!VERB5 && ((ii + 1) >= max)) {
+        SPRTF("%s: Done file: '%s'...\n", module, usr_input);
+        //}
+    }
+    return iret;
+}
+
+
 /*
     main() OS entry
 */
@@ -1197,49 +1282,17 @@ int main(int argc, char **argv)
 {
     //test_gp("xmlParser.sln");
     int iret = 0;
-    size_t ii, max;
     set_fg_root();
-    init_xpaths();
     iret = parse_args(argc, argv);
     if (iret) {
         if (iret == 2)
             iret = 0;
         goto exit;
     }
-    set_suggested_root(usr_input);
-    iret = enum_xml(usr_input); // actions of app
-    if (!VERB5) {
-        SPRTF("%s: Done file: '%s'...\n", module, usr_input);
-    }
 
-    //////////////////////////////////////////////////////
-    /// Deal with the MISSING INCLUDES
-    //////////////////////////////////////////////////////
-    max = vIncludes.size();
-    if (max) {
-        // *** ALWAYS show when missed finding some include files ***
-        SPRTF("%s: Failed to find %d include files...\n", module, (int)max);
-        for (ii = 0; ii < max; ii++) {
-            std::string nf = vIncludes[ii];
-            SPRTF("%s: Fail to find '%s'\n", module, nf.c_str());
-        }
-        if (fg_root)
-            SPRTF("%s: Is the given FG_ROOT=%s correct!\n", module, fg_root);
-        else
-            SPRTF("%s: Note: No FG_ROOT (-r dir) given. Some of these files could reside there...\n", module);
-        show_missed_includes(max);    // ADD diagnostics in hope to find out ***WHY*** missed these files
-        // somehow, expect to FIND THEM ALL!!! But in all recent cases explored, it seems the file
-        // truely DOES NOT EXIST in the current source...
-    }
-    //////////////////////////////////////////////////////
-
+    iret = process_user_inputs();
+ 
     show_done_paths();  // list the DONE files... if VERB1
-
-    if (VERB2) {
-        show_ac_files();
-    }
-
-    show_xpaths(usr_input);
 
 exit:
     clean_up();
