@@ -53,6 +53,8 @@
 
     What I have now seems **very messy**, BUT it WORKS! ;=))
 
+    Home repository: https://github.com/geoffmcl/fgsetxml
+
 */
 
 #include <stdio.h>
@@ -433,7 +435,8 @@ void give_help( char *name )
 {
     show_version();
     SPRTF("\n");
-    SPRTF("%s: usage: [options] xml_input [xml_input2 ...]\n", module);
+    SPRTF("usage:\n");
+    SPRTF("%s [options] 1-set.xml [2-set.xml ...] [@input]\n", module);
     SPRTF("Options:\n");
     SPRTF(" --help   (-h or -?) = This help and exit(0)\n");
     SPRTF(" --verb[n]      (-v) = Bump or set verbosity to n. Values 0,1,...9 (def=%d)\n", verbosity);
@@ -453,12 +456,16 @@ void give_help( char *name )
     SPRTF(" and if desired 'appended' to any '-m file' given.\n");
     SPRTF("\n");
     SPRTF(" These 'aero-set.xml files can include other xml files, sometimes from the FG_ROOT directory,\n");
-    SPRTF(" so it may be necessary to either set FG_ROOT in the environmnet, of using the '-r path' option.\n");
+    SPRTF(" so it may be necessary to either set FG_ROOT in the environmnet, or using the '-r path' option.\n");
     SPRTF("\n");
     SPRTF(" This app uses the 'xmlParser' library from 'http://www.applied-mathematics.net/tools/xmlParser.html',\n");
     SPRTF(" to do the actual XML loading. My thanks to 'Frank Berghen' for this fast efficient parser. So far I\n");
-    SPRTF(" I have not made any corrections to this 2013 code.\n");
-
+    SPRTF(" I have not made any corrections to this 2013 library code.\n");
+    SPRTF("\n");
+    SPRTF(" The '@input' allows commands to be the place in an input file. Each command is space or line separated,\n");
+    SPRTF(" so path or file names, containing spaces need to be double quoted, as on the command line. Comments can be\n");
+    SPRTF(" added after a '#' character.\n");
+    SPRTF("                                                                       Happy aero-set.xml enumeration ;=))\n");
 
 }
 
